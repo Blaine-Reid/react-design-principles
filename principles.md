@@ -1,21 +1,312 @@
-# 🧠 React Design Principles – Study Guide
+# 🧠 React Principles Study Guide
 
-A comprehensive guide to essential React design principles for writing maintainable, scalable components. Each principle includes clear definitions, practical examples, and key takeaways.
-
----
-
-## 📚 Table of Contents
-
-1. [Core React Patterns](#-core-react-patterns)
-2. [Standard React Principles](#-standard-react-principles) 
-3. [Additional Design Principles](#-additional-design-principles)
-4. [Quick Reference](#-quick-reference)
+A curated list of design principles to help write better, cleaner, more maintainable React code.
 
 ---
 
-## 🎯 Core React Patterns
+## 📖 Table of Contents
+
+## ⚛️ [Core React Principles](#-core-react-principles)
+1. [UI is a Pure Function of State](#1-ui-is-a-pure-function-of-state)
+2. [Single Source of Truth](#2-single-source-of-truth)
+3. [Lifting State Up](#3-lifting-state-up)
+4. [Controlled vs Uncontrolled Components](#4-controlled-vs-uncontrolled-components)
+5. [Declarative over Imperative](#5-declarative-over-imperative)
+6. [Keys in Lists](#6-keys-in-lists)
+7. [Effects are for Side Effects](#7-effects-are-for-side-effects)
+
+---
+
+## 🎯 [React Design Patterns & Practices](#react-design-patterns--practices)
+1. [Locality of Behavior > Reusability](#1-locality-of-behavior--reusability)
+2. [Co-locate Until It Hurts](#2-co-locate-until-it-hurts)
+3. [Composition > Configuration](#3-composition--configuration)
+4. [Copy > Abstraction](#4-copy--abstraction)
+5. [Avoid Boolean Hell](#5-avoid-boolean-hell)
+6. [Make State Derivable Whenever Possible](#6-make-state-derivable-whenever-possible)
+7. [Prefer Explicitness Over Generality](#7-prefer-explicitness-over-generality)
+8. [Minimize Context Usage](#8-minimize-context-usage)
+9. [Use Reducers for Complex State](#9-use-reducers-for-complex-state)
+10. [Hooks Encapsulate Behavior, Not Just State](#10-hooks-encapsulate-behavior-not-just-state)
+11. [Render Props > HOCs (for logic sharing)](#11-render-props--hocs-for-logic-sharing)
+
+---
+
+## 🔧 [General Software Design Principles](#-general-software-design-principles-1)
+1. [Defensive Programming](#1-defensive-programming)
+2. [Immutability / Pure Functions](#2-immutability--pure-functions)
+3. [Interface Segregation (for Props)](#3-interface-segregation-for-props)
+4. [Separation of Concerns](#4-separation-of-concerns)
+5. [DRY - But Do It Right](#5-dry---but-do-it-right)
+6. [Open/Closed Principle](#6-open-closed-principle)
+7. [Fail Fast Principle](#7-fail-fast-principle)
+8. [Principle of Least Surprise](#8-principle-of-least-surprise)
+9. [You Aren’t Gonna Need It (YAGNI)](#9-you-arent-gonna-need-it-yagni)
+10. [Optimize for Change, Not Reuse](#10-optimize-for-change-not-reuse)
+11. [The Pit of Success](#11-the-pit-of-success)
+
+---
+
+## 🧪 [Testing Principles](#-testing-principles)
+1. [Test Behavior, Not Implementation](#1-test-behavior-not-implementation)
+2. [Component Contracts > Coverage](#2-component-contracts--coverage)
+3. [Don't Test Styles or Implementation Details](#3-dont-test-styles-or-implementation-details)
+4. [Test Error States and Edge Cases](#4-test-error-states-and-edge-cases)
+5. [Use Realistic Test Data](#5-use-realistic-test-data)
+6. [Mock External Dependencies, Not Internal Logic](#6-mock-external-dependencies-not-internal-logic)
+
+
+---
+
+## 🌊 [UX/UI Design Principles]()
+1. [State Drives UI, But Transitions Drive UX](#1-state-drives-ui-but-transitions-drive-ux)
+2. [Skeletons Over Spinners](#2-skeletons-over-spinners)
+3. [Progressive Enhancement](#3-progressive-enhancement)
+4. [Portals for Escaping DOM Hierarchy](#4-portals-for-escaping-dom-hierarchy)
+
+---
+
+## 🧠 [Mental Models](#-mental-models)
+1. [Smart/Dumb Component Split Isn't Sacred](#smartdumb-component-split-isnt-sacred)
+2. [Prefer Composition Over Inheritance (React-style)](#prefer-composition-over-inheritance-react-style)
+
+---
+
+## 📖 Design Principles Overview
+
+This guide provides a comprehensive overview of design principles that enhance React development. It covers both core React patterns and general software design principles, offering practical examples and key takeaways for each principle.
+
+These principles are designed to improve code maintainability, readability, and developer experience. They are not strict rules but guidelines that can help you make better design decisions in your React applications.
+
+---
+
+## 📘 Core React Principles
 
 These 8 patterns represent modern React best practices that prioritize maintainability and developer experience.
+
+---
+
+### 1. UI is a Pure Function of State
+
+**🔍 What it means:**  
+Your component's render output should depend only on props and state — no side effects or non-determinism.
+
+**✅ Good:**
+```jsx
+function RandomQuote({ quotes }) {
+  const [selectedIndex] = useState(() => Math.floor(Math.random() * quotes.length));
+  return <p>{quotes[selectedIndex].text}</p>;
+}
+```
+
+**❌ Bad:**
+```jsx
+function RandomQuote({ quotes }) {
+  const randomIndex = Math.floor(Math.random() * quotes.length); // Changes every render!
+  return <p>{quotes[randomIndex].text}</p>;
+}
+```
+
+**📌 Key Takeaways:**
+- Use `useState(() => ...)` to create stable values
+- Avoid randomness, time, or external values in render logic
+- Side effects belong in `useEffect`, not render
+
+---
+
+### 2. Single Source of Truth
+
+**🔍 What it means:**  
+State should live in one place — the closest common ancestor of all components that use it.
+
+**✅ Good:**
+```jsx
+function App() {
+  const [count, setCount] = useState(0);
+  return (
+    <div>
+      <Counter count={count} setCount={setCount} />
+      <Display count={count} />
+    </div>
+  );
+}
+```
+
+**❌ Bad:**
+```jsx
+// Duplicated state in siblings
+<ComponentA /> // has its own count
+<ComponentB /> // has its own count - can get out of sync!
+```
+
+**📌 Key Takeaways:**
+- Prevents out-of-sync bugs
+- Enables predictable updates and debugging
+- Makes data flow easier to trace
+
+---
+
+### 3. Lifting State Up
+
+**🔍 What it means:**  
+When multiple components need access to the same state, move that state to their nearest shared parent.
+
+**✅ Good:**
+```jsx
+function Parent() {
+  const [value, setValue] = useState('');
+  return (
+    <div>
+      <Input value={value} onChange={setValue} />
+      <Preview value={value} />
+    </div>
+  );
+}
+```
+
+**❌ Bad:**
+```jsx
+// State trapped in one component
+<Input /> // manages its own value
+<Preview /> // no way to access the input value
+```
+
+**📌 Key Takeaways:**
+- Keeps data flow unidirectional
+- Makes behavior easier to trace and debug
+- Enables component communication through shared state
+
+---
+
+### 4. Controlled vs Uncontrolled Components
+
+**🔍 What it means:**  
+A controlled component's state is managed by React via props, while an uncontrolled component uses refs or the DOM.
+
+**✅ Good (Controlled):**
+```jsx
+function LoginForm() {
+  const [email, setEmail] = useState('');
+  return (
+    <input 
+      value={email} 
+      onChange={e => setEmail(e.target.value)} 
+    />
+  );
+}
+```
+
+**❌ Bad (Uncontrolled):**
+```jsx
+function LoginForm() {
+  return <input defaultValue="hello" />; // React doesn't control the value
+}
+```
+
+**📌 Key Takeaways:**
+- Prefer controlled components for forms
+- Gives you full control over validation and state
+- Use uncontrolled only for performance or library constraints
+
+---
+
+### 5. Declarative over Imperative
+
+**🔍 What it means:**  
+Describe what the UI should look like based on state — not how to manually update it.
+
+**✅ Good (Declarative):**
+```jsx
+function Modal({ isOpen }) {
+  return (
+    <div>
+      {isOpen && <div className="modal">Modal Content</div>}
+    </div>
+  );
+}
+```
+
+**❌ Bad (Imperative):**
+```jsx
+function Modal({ isOpen }) {
+  const modalRef = useRef();
+  
+  useEffect(() => {
+    if (isOpen) {
+      modalRef.current?.show();
+    } else {
+      modalRef.current?.hide();
+    }
+  }, [isOpen]);
+  
+  return <div ref={modalRef} className="modal">Modal Content</div>;
+}
+```
+
+**📌 Key Takeaways:**
+- React re-renders based on state changes
+- Let the render function describe the UI
+- Avoid manual DOM manipulation
+
+---
+
+### 6. Keys in Lists
+
+**🔍 What it means:**  
+Always use stable, unique keys when rendering dynamic lists.
+
+**✅ Good:**
+```jsx
+{users.map(user => (
+  <UserCard key={user.id} user={user} />
+))}
+```
+
+**❌ Bad:**
+```jsx
+{users.map((user, index) => (
+  <UserCard key={index} user={user} /> // Index is not stable!
+))}
+```
+
+**📌 Key Takeaways:**
+- Helps React track elements across renders efficiently
+- Prevents bugs in animations and input states
+- Use stable, unique identifiers, not array indices
+
+---
+
+### 7. Effects are for Side Effects
+
+**🔍 What it means:**  
+Use `useEffect` only for logic that has to happen outside rendering — like subscriptions, data fetching, and DOM manipulation.
+
+**✅ Good:**
+```jsx
+useEffect(() => {
+  const subscription = api.subscribe(data);
+  return () => subscription.unsubscribe();
+}, []);
+```
+
+**❌ Bad:**
+```jsx
+const [count, setCount] = useState(0);
+const [doubleCount, setDoubleCount] = useState(0);
+
+useEffect(() => {
+  setDoubleCount(count * 2); // This should be derived!
+}, [count]);
+```
+
+**📌 Key Takeaways:**
+- Avoid using effects to set derived state
+- Effects are for synchronization with the outside world
+- Most "effects" can be replaced with derived state or event handlers
+
+---
+
+## React Design Patterns & Practices
 
 ### 1. Locality of Behavior > Reusability
 
@@ -48,101 +339,7 @@ function UserCard({ user }) {
 
 ---
 
-### 2. Make State Derivable Whenever Possible
-
-**🔍 What it means:**  
-Don't store values in state that can be calculated from props or other state.
-
-**✅ Good:**
-```jsx
-const [cartItems, setCartItems] = useState<Item[]>([]);
-const cartCount = cartItems.length; // Derived!
-const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
-```
-
-**❌ Bad:**
-```jsx
-const [cartItems, setCartItems] = useState<Item[]>([]);
-const [cartCount, setCartCount] = useState(0);
-const [totalPrice, setTotalPrice] = useState(0);
-
-useEffect(() => {
-  setCartCount(cartItems.length);
-  setTotalPrice(cartItems.reduce((sum, item) => sum + item.price, 0));
-}, [cartItems]);
-```
-
-**📌 Key Takeaways:**
-- Store the source of truth, derive everything else
-- Fewer state variables = fewer bugs
-- Eliminates synchronization issues between related state
-
----
-
-### 3. Avoid Boolean Hell
-
-**🔍 What it means:**  
-Avoid juggling multiple booleans for related UI states. Prefer single status values or enums.
-
-**✅ Good:**
-```jsx
-type Status = 'idle' | 'loading' | 'success' | 'error';
-const [status, setStatus] = useState<Status>('idle');
-
-return (
-  <div>
-    {status === 'loading' && <Spinner />}
-    {status === 'success' && <SuccessMessage />}
-    {status === 'error' && <ErrorMessage />}
-  </div>
-);
-```
-
-**❌ Bad:**
-```jsx
-const [isLoading, setIsLoading] = useState(false);
-const [isError, setIsError] = useState(false);
-const [isSuccess, setIsSuccess] = useState(false);
-
-// Risk of impossible states: isLoading && isSuccess
-```
-
-**📌 Key Takeaways:**
-- Use strings or discriminated unions for mutually exclusive states
-- Prevents impossible or contradictory combinations
-- Makes state transitions explicit and predictable
-
----
-
-### 4. UI is a Pure Function of State
-
-**🔍 What it means:**  
-Your component's render output should depend only on props and state — no side effects or non-determinism.
-
-**✅ Good:**
-```jsx
-function RandomQuote({ quotes }) {
-  const [selectedIndex] = useState(() => Math.floor(Math.random() * quotes.length));
-  return <p>{quotes[selectedIndex].text}</p>;
-}
-```
-
-**❌ Bad:**
-```jsx
-function RandomQuote({ quotes }) {
-  const randomIndex = Math.floor(Math.random() * quotes.length); // Changes every render!
-  return <p>{quotes[randomIndex].text}</p>;
-}
-```
-
-**📌 Key Takeaways:**
-- Use `useState(() => ...)` to create stable values
-- Avoid randomness, time, or external values in render logic
-- Side effects belong in `useEffect`, not render
-
----
-
-### 5. Co-locate Until It Hurts
+### 2. Co-locate Until It Hurts
 
 **🔍 What it means:**  
 Keep helpers, styles, and state logic with the component that uses them — don't extract too early.
@@ -177,33 +374,7 @@ export const calculateSalePrice = (product) => product.price * (1 - product.disc
 
 ---
 
-### 6. Prefer Explicitness Over Generality
-
-**🔍 What it means:**  
-Make your components and props specific and intention-revealing — avoid over-generic abstractions.
-
-**✅ Good:**
-```jsx
-<HeroSection />
-<FeaturesSection />
-<CTASection />
-```
-
-**❌ Bad:**
-```jsx
-<Section type="hero" />
-<Section type="features" />
-<Section type="cta" />
-```
-
-**📌 Key Takeaways:**
-- If it's doing a specific job, name it that way
-- Avoid config-driven "god components" unless there's real value
-- Explicit components are easier to understand and modify
-
----
-
-### 7. Composition > Configuration
+### 3. Composition > Configuration
 
 **🔍 What it means:**  
 Favor using JSX composition (children and slots) instead of passing props to configure behavior.
@@ -237,7 +408,7 @@ Favor using JSX composition (children and slots) instead of passing props to con
 
 ---
 
-### 8. Copy > Abstraction
+### 4. Copy > Abstraction
 
 **🔍 What it means:**  
 Prefer copying JSX over abstracting into reusable components until the abstraction provides real benefit.
@@ -290,23 +461,117 @@ function VerificationItem({ type, value, onVerify }) {
 
 ---
 
-## 📘 Standard React Principles
-
-Foundational principles that are core to how React is designed to be used effectively.
-
-### 1. Single Source of Truth
+### 5. Avoid Boolean Hell
 
 **🔍 What it means:**  
-State should live in one place — the closest common ancestor of all components that use it.
+Avoid juggling multiple booleans for related UI states. Prefer single status values or enums.
 
 **✅ Good:**
 ```jsx
-function App() {
-  const [count, setCount] = useState(0);
+type Status = 'idle' | 'loading' | 'success' | 'error';
+const [status, setStatus] = useState<Status>('idle');
+
+return (
+  <div>
+    {status === 'loading' && <Spinner />}
+    {status === 'success' && <SuccessMessage />}
+    {status === 'error' && <ErrorMessage />}
+  </div>
+);
+```
+
+**❌ Bad:**
+```jsx
+const [isLoading, setIsLoading] = useState(false);
+const [isError, setIsError] = useState(false);
+const [isSuccess, setIsSuccess] = useState(false);
+
+// Risk of impossible states: isLoading && isSuccess
+```
+
+**📌 Key Takeaways:**
+- Use strings or discriminated unions for mutually exclusive states
+- Prevents impossible or contradictory combinations
+- Makes state transitions explicit and predictable
+
+---
+
+### 6. Make State Derivable Whenever Possible
+
+**🔍 What it means:**  
+Don't store values in state that can be calculated from props or other state.
+
+**✅ Good:**
+```jsx
+const [cartItems, setCartItems] = useState<Item[]>([]);
+const cartCount = cartItems.length; // Derived!
+const totalPrice = cartItems.reduce((sum, item) => sum + item.price, 0);
+```
+
+**❌ Bad:**
+```jsx
+const [cartItems, setCartItems] = useState<Item[]>([]);
+const [cartCount, setCartCount] = useState(0);
+const [totalPrice, setTotalPrice] = useState(0);
+
+useEffect(() => {
+  setCartCount(cartItems.length);
+  setTotalPrice(cartItems.reduce((sum, item) => sum + item.price, 0));
+}, [cartItems]);
+```
+
+**📌 Key Takeaways:**
+- Store the source of truth, derive everything else
+- Fewer state variables = fewer bugs
+- Eliminates synchronization issues between related state
+
+---
+
+### 7. Prefer Explicitness Over Generality
+
+**🔍 What it means:**  
+Make your components and props specific and intention-revealing — avoid over-generic abstractions.
+
+**✅ Good:**
+```jsx
+<HeroSection />
+<FeaturesSection />
+<CTASection />
+```
+
+**❌ Bad:**
+```jsx
+<Section type="hero" />
+<Section type="features" />
+<Section type="cta" />
+```
+
+**📌 Key Takeaways:**
+- If it's doing a specific job, name it that way
+- Avoid config-driven "god components" unless there's real value
+- Explicit components are easier to understand and modify
+
+---
+
+### 8. Minimize Context Usage
+
+**🔍 What it means:**  
+Use React Context sparingly for truly global state. Prefer prop drilling or state lifting for most component communication.
+
+**✅ Good:**
+```jsx
+// Use context for truly global state
+const ThemeContext = createContext();
+const UserContext = createContext();
+
+// Prop drilling for local state is often better
+function UserDashboard({ userId }) {
+  const [user, setUser] = useState(null);
+  
   return (
     <div>
-      <Counter count={count} setCount={setCount} />
-      <Display count={count} />
+      <UserHeader user={user} />
+      <UserContent user={user} onUpdate={setUser} />
     </div>
   );
 }
@@ -314,181 +579,208 @@ function App() {
 
 **❌ Bad:**
 ```jsx
-// Duplicated state in siblings
-<ComponentA /> // has its own count
-<ComponentB /> // has its own count - can get out of sync!
+// Over-using context for local state
+const UserContext = createContext();
+const PostContext = createContext();
+const CommentContext = createContext();
+const LikeContext = createContext();
+
+// Every piece of state gets its own context
 ```
 
 **📌 Key Takeaways:**
-- Prevents out-of-sync bugs
-- Enables predictable updates and debugging
-- Makes data flow easier to trace
+- Context creates implicit dependencies that are hard to track
+- Use for theme, authentication, language settings
+- Prefer explicit prop passing for most component communication
+- Context makes components harder to test and reuse
 
 ---
 
-### 2. Lifting State Up
+### 9. Use Reducers for Complex State
 
 **🔍 What it means:**  
-When multiple components need access to the same state, move that state to their nearest shared parent.
+When state updates become complex or interdependent, useReducer can provide better organization than multiple useState calls.
 
 **✅ Good:**
 ```jsx
-function Parent() {
-  const [value, setValue] = useState('');
+function ShoppingCart() {
+  const [state, dispatch] = useReducer(cartReducer, { items: [], total: 0 });
+  
+  const addItem = (product) => dispatch({ type: 'ADD_ITEM', product });
+  const removeItem = (id) => dispatch({ type: 'REMOVE_ITEM', id });
+  const applyCoupon = (code) => dispatch({ type: 'APPLY_COUPON', code });
+  
   return (
     <div>
-      <Input value={value} onChange={setValue} />
-      <Preview value={value} />
+      {state.items.map(item => (
+        <CartItem key={item.id} item={item} onRemove={() => removeItem(item.id)} />
+      ))}
+      <Total amount={state.total} />
     </div>
   );
+}
+
+function cartReducer(state, action) {
+  switch (action.type) {
+    case 'ADD_ITEM':
+      const newItems = [...state.items, action.product];
+      return { ...state, items: newItems, total: calculateTotal(newItems) };
+    case 'REMOVE_ITEM':
+      const filteredItems = state.items.filter(item => item.id !== action.id);
+      return { ...state, items: filteredItems, total: calculateTotal(filteredItems) };
+    default:
+      return state;
+  }
 }
 ```
 
 **❌ Bad:**
 ```jsx
-// State trapped in one component
-<Input /> // manages its own value
-<Preview /> // no way to access the input value
-```
-
-**📌 Key Takeaways:**
-- Keeps data flow unidirectional
-- Makes behavior easier to trace and debug
-- Enables component communication through shared state
-
----
-
-### 3. Controlled vs Uncontrolled Components
-
-**🔍 What it means:**  
-A controlled component's state is managed by React via props, while an uncontrolled component uses refs or the DOM.
-
-**✅ Good (Controlled):**
-```jsx
-function LoginForm() {
-  const [email, setEmail] = useState('');
-  return (
-    <input 
-      value={email} 
-      onChange={e => setEmail(e.target.value)} 
-    />
-  );
-}
-```
-
-**❌ Bad (Uncontrolled):**
-```jsx
-function LoginForm() {
-  return <input defaultValue="hello" />; // React doesn't control the value
+function ShoppingCart() {
+  const [items, setItems] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [discount, setDiscount] = useState(0);
+  const [tax, setTax] = useState(0);
+  
+  // Complex interdependent updates scattered throughout
+  const addItem = (product) => {
+    const newItems = [...items, product];
+    setItems(newItems);
+    const newTotal = calculateSubtotal(newItems);
+    setTotal(newTotal);
+    setTax(newTotal * 0.08);
+    // Easy to forget to update related state
+  };
 }
 ```
 
 **📌 Key Takeaways:**
-- Prefer controlled components for forms
-- Gives you full control over validation and state
-- Use uncontrolled only for performance or library constraints
+- Use for state with multiple sub-values that depend on each other
+- Centralizes state update logic in one place
+- Makes complex state transitions more predictable
+- Better than multiple useState when updates are interdependent
 
 ---
 
-### 4. Declarative over Imperative
+### 10. Hooks Encapsulate Behavior, Not Just State
 
 **🔍 What it means:**  
-Describe what the UI should look like based on state — not how to manually update it.
+Custom hooks should package complete behaviors with their associated state, effects, and logic - not just stateful values.
 
-**✅ Good (Declarative):**
+**✅ Good:**
 ```jsx
-function Modal({ isOpen }) {
-  return (
-    <div>
-      {isOpen && <div className="modal">Modal Content</div>}
-    </div>
-  );
-}
-```
-
-**❌ Bad (Imperative):**
-```jsx
-function Modal({ isOpen }) {
-  const modalRef = useRef();
+// Complete behavior encapsulation
+function useApi(endpoint) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  
+  const refetch = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(endpoint);
+      const result = await response.json();
+      setData(result);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [endpoint]);
   
   useEffect(() => {
-    if (isOpen) {
-      modalRef.current?.show();
-    } else {
-      modalRef.current?.hide();
-    }
-  }, [isOpen]);
+    refetch();
+  }, [refetch]);
   
-  return <div ref={modalRef} className="modal">Modal Content</div>;
+  return { data, loading, error, refetch };
+}
+```
+
+**❌ Bad:**
+```jsx
+// Just wrapping useState
+function useCounter() {
+  return useState(0);
+}
+
+function useToggle() {
+  return useState(false);
 }
 ```
 
 **📌 Key Takeaways:**
-- React re-renders based on state changes
-- Let the render function describe the UI
-- Avoid manual DOM manipulation
+- Custom hooks should solve complete problems
+- Include related effects, computations, and event handlers
+- Provide a clean API that hides implementation details
+- Abstract entire behaviors, not just state management
 
 ---
 
-### 5. Keys in Lists
+### 11. Render Props > HOCs (for logic sharing)
 
 **🔍 What it means:**  
-Always use stable, unique keys when rendering dynamic lists.
+When sharing stateful logic between components, prefer render props pattern over Higher-Order Components for better flexibility and composition.
 
 **✅ Good:**
 ```jsx
-{users.map(user => (
-  <UserCard key={user.id} user={user} />
-))}
+// Render props pattern
+function DataProvider({ endpoint, children }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  
+  useEffect(() => {
+    fetch(endpoint)
+      .then(res => res.json())
+      .then(setData)
+      .finally(() => setLoading(false));
+  }, [endpoint]);
+  
+  return children({ data, loading });
+}
+
+// Usage is explicit and flexible
+<DataProvider endpoint="/api/users">
+  {({ data, loading }) => (
+    loading ? <Spinner /> : <UserList users={data} />
+  )}
+</DataProvider>
 ```
 
 **❌ Bad:**
 ```jsx
-{users.map((user, index) => (
-  <UserCard key={index} user={user} /> // Index is not stable!
-))}
+// HOC pattern (less flexible)
+function withData(WrappedComponent, endpoint) {
+  return function DataHOC(props) {
+    const [data, setData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    
+    useEffect(() => {
+      fetch(endpoint)
+        .then(res => res.json())
+        .then(setData)
+        .finally(() => setLoading(false));
+    }, []);
+    
+    return <WrappedComponent {...props} data={data} loading={loading} />;
+  };
+}
+
+// Usage is implicit and inflexible
+const UserListWithData = withData(UserList, '/api/users');
 ```
 
 **📌 Key Takeaways:**
-- Helps React track elements across renders efficiently
-- Prevents bugs in animations and input states
-- Use stable, unique identifiers, not array indices
+- Render props make data flow explicit
+- Better composition and flexibility than HOCs
+- Easier to understand where props come from
+- Modern React prefers hooks over both patterns
 
 ---
 
-### 6. Effects are for Side Effects
+## 🧠 General Software Design Principles
 
-**🔍 What it means:**  
-Use `useEffect` only for logic that has to happen outside rendering — like subscriptions, data fetching, and DOM manipulation.
-
-**✅ Good:**
-```jsx
-useEffect(() => {
-  const subscription = api.subscribe(data);
-  return () => subscription.unsubscribe();
-}, []);
-```
-
-**❌ Bad:**
-```jsx
-const [count, setCount] = useState(0);
-const [doubleCount, setDoubleCount] = useState(0);
-
-useEffect(() => {
-  setDoubleCount(count * 2); // This should be derived!
-}, [count]);
-```
-
-**📌 Key Takeaways:**
-- Avoid using effects to set derived state
-- Effects are for synchronization with the outside world
-- Most "effects" can be replaced with derived state or event handlers
-
----
-
-## 🔧 Additional Design Principles
-
-Essential software design principles that complement React patterns.
+These principles apply to software design in general, but are particularly relevant for React applications.
 
 ### 1. Defensive Programming
 
@@ -682,7 +974,672 @@ function UserCard(props: UserCardProps) {
 
 ---
 
-### 4. Progressive Enhancement
+### 4. Separation of Concerns
+
+**🔍 What it means:**  
+Keep different responsibilities in different places - UI logic, business logic, and data access should be separate.
+
+**✅ Good:**
+```jsx
+// Component handles UI only
+function UserProfile({ userId }) {
+  const user = useUser(userId); // Custom hook handles data
+  return <div>{user?.name}</div>;
+}
+
+// Hook handles data fetching
+function useUser(id) {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    fetchUser(id).then(setUser);
+  }, [id]);
+  return user;
+}
+```
+
+**❌ Bad:**
+```jsx
+function UserProfile({ userId }) {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    // Mixing API calls with UI component
+    fetch(`/api/users/${userId}`)
+      .then(res => res.json())
+      .then(setUser);
+  }, [userId]);
+  return <div>{user?.name}</div>;
+}
+```
+
+**📌 Key Takeaways:**
+- Components focus on rendering
+- Custom hooks handle business logic and data fetching
+- Utility functions handle pure calculations
+
+---
+
+### 5. DRY - But Do It Right
+
+**🔍 What it means:**  
+Eliminate duplication, but only when it actually reduces complexity and improves maintainability.
+
+**✅ Good:**
+```jsx
+// Shared logic used in 3+ components
+const useApi = (endpoint) => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  // Complex API logic here
+  return { data, loading, refetch };
+};
+```
+
+**❌ Bad:**
+```jsx
+// Extracting one-off logic just because it "looks similar"
+const formatUserName = (first, last) => `${first} ${last}`;
+```
+
+**📌 Key Takeaways:**
+- Extract when you have genuine duplication (3+ uses)
+- Don't extract just because code "looks similar"
+- Sometimes duplication is better than the wrong abstraction
+
+---
+
+### 6. Open Closed Principle
+
+**🔍 What it means:**  
+Components should be open for extension but closed for modification. Use composition and props to extend behavior.
+
+**✅ Good:**
+```jsx
+function Dialog({ children, actions }) {
+  return (
+    <div className="dialog">
+      <div className="dialog-content">{children}</div>
+      <div className="dialog-actions">{actions}</div>
+    </div>
+  );
+}
+
+// Extended through composition
+<Dialog actions={<Button>OK</Button>}>
+  <p>Are you sure you want to delete this item?</p>
+</Dialog>
+```
+
+**❌ Bad:**
+```jsx
+function Dialog({ message, showOk, showCancel, onOk, onCancel }) {
+  // Modifying component for every new use case
+  return (
+    <div className="dialog">
+      <p>{message}</p>
+      <div>
+        {showOk && <button onClick={onOk}>OK</button>}
+        {showCancel && <button onClick={onCancel}>Cancel</button>}
+      </div>
+    </div>
+  );
+}
+```
+
+**📌 Key Takeaways:**
+- Design for extension through props and composition
+- Avoid modifying existing components for new requirements
+- Use render props or children for maximum flexibility
+
+---
+
+### 7. Fail Fast Principle
+
+**🔍 What it means:**  
+Detect and report errors as early as possible, preferably at development time.
+
+**✅ Good:**
+```jsx
+function Button({ variant, children }) {
+  if (!['primary', 'secondary', 'danger'].includes(variant)) {
+    throw new Error(`Invalid variant: ${variant}. Must be primary, secondary, or danger.`);
+  }
+  return <button className={`btn btn-${variant}`}>{children}</button>;
+}
+```
+
+**❌ Bad:**
+```jsx
+function Button({ variant, children }) {
+  // Silently falls back, bug might go unnoticed
+  const className = variant === 'primary' ? 'btn-primary' : 'btn-secondary';
+  return <button className={className}>{children}</button>;
+}
+```
+
+**📌 Key Takeaways:**
+- Use TypeScript for compile-time error catching
+- Validate props and throw meaningful errors
+- Use development-only warnings for common mistakes
+
+---
+
+### 8. Principle of Least Surprise
+
+**🔍 What it means:**  
+Components should behave the way users expect them to, following common patterns and conventions.
+
+**✅ Good:**
+```jsx
+<Button onClick={handleClick} disabled={isLoading}>
+  {isLoading ? 'Loading...' : 'Submit'}
+</Button>
+```
+
+**❌ Bad:**
+```jsx
+<Button pressHandler={handleClick} isNotActive={isLoading}>
+  Submit
+</Button>
+```
+
+**📌 Key Takeaways:**
+- Use standard prop names (`onClick`, not `pressHandler`)
+- Follow established React patterns and conventions
+- Make behavior predictable and consistent
+
+---
+
+### 9. You Aren’t Gonna Need It (YAGNI)
+
+**🔍 What it means:**  
+Don't build functionality until you actually need it. Avoid over-engineering for hypothetical future requirements.
+
+**✅ Good:**
+```jsx
+// Simple solution for current needs
+function UserCard({ user }) {
+  return (
+    <div className="user-card">
+      <h3>{user.name}</h3>
+      <p>{user.email}</p>
+    </div>
+  );
+}
+```
+
+**❌ Bad:**
+```jsx
+// Over-engineered for imaginary future needs
+function UserCard({ 
+  user, 
+  showAvatar = false,
+  avatarSize = 'medium',
+  titleLevel = 3,
+  customRenderer,
+  theme = 'default',
+  layout = 'vertical'
+}) {
+  // Complex logic for unused features
+}
+```
+
+**📌 Key Takeaways:**
+- Solve today's problems, not tomorrow's maybes
+- Add complexity when you have real requirements
+- Refactor when you actually need the flexibility
+
+---
+
+### Optimize for Change, Not Reuse
+
+### The Pit of Success
+
+---
+
+## 🧪 Testing Principles
+
+Essential principles for testing React applications effectively.
+
+### 1. Test Behavior, Not Implementation
+
+**🔍 What it means:**  
+Focus on testing what the component does for users, not how it does it internally.
+
+**✅ Good:**
+```jsx
+test('shows error message when login fails', async () => {
+  render(<LoginForm />);
+  
+  fireEvent.change(screen.getByLabelText(/email/i), {
+    target: { value: 'user@example.com' }
+  });
+  fireEvent.change(screen.getByLabelText(/password/i), {
+    target: { value: 'wrongpassword' }
+  });
+  
+  fireEvent.click(screen.getByRole('button', { name: /login/i }));
+  
+  await waitFor(() => {
+    expect(screen.getByText(/invalid credentials/i)).toBeInTheDocument();
+  });
+});
+```
+
+**❌ Bad:**
+```jsx
+test('calls setError when handleSubmit receives 401', () => {
+  const mockSetError = jest.fn();
+  useState.mockReturnValue(['', mockSetError]);
+  
+  const wrapper = shallow(<LoginForm />);
+  wrapper.instance().handleSubmit({ /* mock event */ });
+  
+  expect(mockSetError).toHaveBeenCalledWith('Invalid credentials');
+});
+```
+
+**📌 Key Takeaways:**
+- Test user interactions and visible outcomes
+- Avoid testing internal state or method calls
+- Use React Testing Library over Enzyme for behavior-focused testing
+- Tests should break when behavior changes, not implementation
+
+---
+
+### 2. Component Contracts > Coverage
+
+**🔍 What it means:**  
+Focus on testing the "contract" of your component (props in, behavior out) rather than achieving 100% line coverage.
+
+**✅ Good:**
+```jsx
+describe('UserCard', () => {
+  test('displays user information correctly', () => {
+    const user = { name: 'John Doe', email: 'john@example.com', verified: true };
+    render(<UserCard user={user} />);
+    
+    expect(screen.getByText('John Doe')).toBeInTheDocument();
+    expect(screen.getByText('john@example.com')).toBeInTheDocument();
+    expect(screen.getByText('✓ Verified')).toBeInTheDocument();
+  });
+  
+  test('shows unverified state when user is not verified', () => {
+    const user = { name: 'Jane Doe', email: 'jane@example.com', verified: false };
+    render(<UserCard user={user} />);
+    
+    expect(screen.queryByText('✓ Verified')).not.toBeInTheDocument();
+  });
+  
+  test('calls onEdit when edit button is clicked', () => {
+    const mockOnEdit = jest.fn();
+    const user = { id: '123', name: 'John Doe', email: 'john@example.com' };
+    
+    render(<UserCard user={user} onEdit={mockOnEdit} />);
+    fireEvent.click(screen.getByRole('button', { name: /edit/i }));
+    
+    expect(mockOnEdit).toHaveBeenCalledWith('123');
+  });
+});
+```
+
+**❌ Bad:**
+```jsx
+test('reaches 100% line coverage', () => {
+  // Testing every single line regardless of value
+  const wrapper = mount(<UserCard user={mockUser} />);
+  wrapper.find('.user-name').simulate('click'); // Just to hit this line
+  wrapper.find('.hidden-dev-method').simulate('click'); // Internal method
+  expect(wrapper.state('internalFlag')).toBe(true); // Testing internal state
+});
+```
+
+**📌 Key Takeaways:**
+- Test all props and their effects on output
+- Test all user interactions and their outcomes
+- Test edge cases and error states
+- Don't chase coverage metrics—chase confidence in your component's behavior
+
+---
+
+### 3. Don't Test Styles or Implementation Details
+
+**🔍 What it means:**  
+Avoid testing CSS styles, specific DOM structure, or internal implementation details. Focus on user-facing behavior instead.
+
+**✅ Good:**
+```jsx
+test('shows success message when form is submitted successfully', async () => {
+  render(<ContactForm />);
+  
+  fireEvent.change(screen.getByLabelText(/email/i), {
+    target: { value: 'test@example.com' }
+  });
+  fireEvent.change(screen.getByLabelText(/message/i), {
+    target: { value: 'Hello world' }
+  });
+  
+  fireEvent.click(screen.getByRole('button', { name: /send/i }));
+  
+  await waitFor(() => {
+    expect(screen.getByText(/message sent successfully/i)).toBeInTheDocument();
+  });
+});
+```
+
+**❌ Bad:**
+```jsx
+test('applies correct CSS classes', () => {
+  render(<Button variant="primary" />);
+  const button = screen.getByRole('button');
+  
+  expect(button).toHaveClass('btn', 'btn-primary', 'btn-medium');
+  expect(button).toHaveStyle('background-color: blue');
+});
+
+test('has correct DOM structure', () => {
+  render(<UserCard user={mockUser} />);
+  
+  expect(container.querySelector('.user-card > .user-header > h3')).toBeInTheDocument();
+  expect(container.querySelectorAll('.user-info > p')).toHaveLength(2);
+});
+```
+
+**📌 Key Takeaways:**
+- Styles are tested by visual regression or manual testing
+- Test what users see and interact with, not how it's structured
+- DOM structure is implementation detail, not user-facing behavior
+- CSS classes are internal details users don't care about
+
+---
+
+### 4. Test Error States and Edge Cases
+
+**🔍 What it means:**  
+Ensure your components handle error conditions, loading states, empty data, and edge cases gracefully.
+
+**✅ Good:**
+```jsx
+describe('UserList', () => {
+  test('shows loading state while fetching users', () => {
+    render(<UserList loading={true} users={[]} />);
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+  });
+  
+  test('shows empty state when no users exist', () => {
+    render(<UserList loading={false} users={[]} />);
+    expect(screen.getByText(/no users found/i)).toBeInTheDocument();
+  });
+  
+  test('shows error message when fetch fails', () => {
+    render(<UserList error="Failed to fetch users" />);
+    expect(screen.getByText(/failed to fetch users/i)).toBeInTheDocument();
+  });
+  
+  test('handles invalid user data gracefully', () => {
+    const invalidUsers = [{ id: 1 }, { id: 2, name: null, email: undefined }];
+    render(<UserList users={invalidUsers} />);
+    
+    expect(screen.getByText(/unknown user/i)).toBeInTheDocument();
+  });
+});
+```
+
+**❌ Bad:**
+```jsx
+test('renders users correctly', () => {
+  const users = [
+    { id: 1, name: 'John', email: 'john@example.com' },
+    { id: 2, name: 'Jane', email: 'jane@example.com' }
+  ];
+  
+  render(<UserList users={users} />);
+  
+  expect(screen.getByText('John')).toBeInTheDocument();
+  expect(screen.getByText('Jane')).toBeInTheDocument();
+  // Only tests the happy path
+});
+```
+
+**📌 Key Takeaways:**
+- Test loading, error, and empty states
+- Test with malformed or missing data
+- Ensure graceful degradation
+- Edge cases often reveal the most bugs
+
+---
+
+### 5. Use Realistic Test Data
+
+**🔍 What it means:**  
+Use test data that resembles real-world data rather than overly simplified mocks. Include edge cases in your test data.
+
+**✅ Good:**
+```jsx
+const mockUsers = [
+  {
+    id: 'user-123',
+    name: 'José María García-González',
+    email: 'jose.maria.garcia@empresa-tecnologica.com',
+    avatar: null,
+    roles: ['admin', 'editor'],
+    lastLogin: '2023-12-15T10:30:00Z',
+    isActive: true
+  },
+  {
+    id: 'user-456',
+    name: '王小明',
+    email: 'wang.xiaoming@example.cn',
+    avatar: 'https://example.com/avatar.jpg',
+    roles: [],
+    lastLogin: null,
+    isActive: false
+  }
+];
+
+test('displays international names correctly', () => {
+  render(<UserList users={mockUsers} />);
+  expect(screen.getByText('José María García-González')).toBeInTheDocument();
+  expect(screen.getByText('王小明')).toBeInTheDocument();
+});
+```
+
+**❌ Bad:**
+```jsx
+const mockUsers = [
+  { id: 1, name: 'User 1', email: 'user1@test.com' },
+  { id: 2, name: 'User 2', email: 'user2@test.com' }
+];
+
+// Overly simplified data that doesn't reflect real-world complexity
+```
+
+**📌 Key Takeaways:**
+- Include special characters, long strings, null values
+- Test with realistic data volumes
+- Use actual API response shapes
+- Include edge cases like empty arrays, null values
+
+---
+
+### 6. Mock External Dependencies, Not Internal Logic
+
+**🔍 What it means:**  
+Mock external services, APIs, and third-party libraries, but avoid mocking your own application logic.
+
+**✅ Good:**
+```jsx
+// Mock external API calls
+jest.mock('../api/userService', () => ({
+  fetchUsers: jest.fn(() => Promise.resolve(mockUsers)),
+  createUser: jest.fn(() => Promise.resolve({ id: 'new-user' }))
+}));
+
+test('creates user when form is submitted', async () => {
+  render(<UserForm />);
+  
+  fireEvent.change(screen.getByLabelText(/name/i), {
+    target: { value: 'New User' }
+  });
+  fireEvent.click(screen.getByRole('button', { name: /save/i }));
+  
+  await waitFor(() => {
+    expect(userService.createUser).toHaveBeenCalledWith({
+      name: 'New User'
+    });
+  });
+});
+```
+
+**❌ Bad:**
+```jsx
+// Mocking internal component logic
+jest.mock('../components/UserForm', () => ({
+  validateForm: jest.fn(() => true),
+  formatUserData: jest.fn(data => data)
+}));
+
+// This tests the mock, not the actual component behavior
+```
+
+**📌 Key Takeaways:**
+- Mock fetch, axios, third-party libraries
+- Don't mock your own functions and components
+- Mock at the boundaries of your system
+- Prefer integration tests over heavily mocked unit tests
+
+---
+
+## 🌊 UX/UI Design Principles
+
+These principles focus on user experience and interface design in React applications.
+
+### 1. State Drives UI, But Transitions Drive UX
+
+**🔍 What it means:**  
+While state determines what's shown, thoughtful transitions and animations create a smooth, understandable user experience.
+
+**✅ Good:**
+```jsx
+function SearchResults({ query, isLoading, results }) {
+  return (
+    <div className="search-results">
+      <AnimatePresence mode="wait">
+        {isLoading ? (
+          <motion.div
+            key="loading"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="loading-state"
+          >
+            <Spinner />
+            <p>Searching for "{query}"...</p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="results"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="results-list"
+          >
+            {results.map(result => (
+              <ResultItem key={result.id} result={result} />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+```
+
+**❌ Bad:**
+```jsx
+function SearchResults({ query, isLoading, results }) {
+  // Jarring instant state changes
+  if (isLoading) return <Spinner />;
+  return <div>{results.map(result => <ResultItem key={result.id} result={result} />)}</div>;
+}
+```
+
+**📌 Key Takeaways:**
+- Use meaningful transitions between states
+- Give users visual feedback about what's happening
+- Avoid sudden, jarring state changes
+- Consider loading states, empty states, and error states
+
+---
+
+### 2. Skeletons Over Spinners
+
+**🔍 What it means:**  
+Show the structure of content while it loads instead of generic spinners to reduce perceived loading time.
+
+**✅ Good:**
+```jsx
+function UserProfile({ userId }) {
+  const { user, isLoading } = useUser(userId);
+  
+  if (isLoading) {
+    return (
+      <div className="user-profile">
+        <div className="skeleton-avatar" />
+        <div className="skeleton-text skeleton-name" />
+        <div className="skeleton-text skeleton-email" />
+        <div className="skeleton-text skeleton-bio" />
+        <div className="skeleton-button" />
+      </div>
+    );
+  }
+  
+  return (
+    <div className="user-profile">
+      <img src={user.avatar} alt={user.name} />
+      <h2>{user.name}</h2>
+      <p>{user.email}</p>
+      <p>{user.bio}</p>
+      <button>Edit Profile</button>
+    </div>
+  );
+}
+```
+
+**❌ Bad:**
+```jsx
+function UserProfile({ userId }) {
+  const { user, isLoading } = useUser(userId);
+  
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <Spinner />
+        <p>Loading user profile...</p>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="user-profile">
+      <img src={user.avatar} alt={user.name} />
+      <h2>{user.name}</h2>
+      <p>{user.email}</p>
+      <p>{user.bio}</p>
+      <button>Edit Profile</button>
+    </div>
+  );
+}
+```
+
+**📌 Key Takeaways:**
+- Skeleton screens feel faster than spinners
+- Show the layout users will see once content loads
+- Use progressive loading for complex UIs
+- Match skeleton dimensions to actual content
+
+---
+
+### 3. Progressive Enhancement
 
 **🔍 What it means:**  
 Build features that work at a basic level and enhance with advanced functionality. Ensure core functionality works without JavaScript.
@@ -779,59 +1736,38 @@ function ContactForm() {
 
 ---
 
-### 5. Minimize State Surface Area
+### 4. Portals for Escaping DOM Hierarchy
 
 **🔍 What it means:**  
-Keep state as small and focused as possible. Derive values instead of storing them.
+Use React Portals to render modals, tooltips, and overlays outside the normal component tree when needed for styling or z-index issues.
 
 **✅ Good:**
 ```jsx
-function ShoppingCart() {
-  // Minimal state - only store what can't be derived
-  const [items, setItems] = useState([]);
-  const [couponCode, setCouponCode] = useState('');
+function Modal({ isOpen, onClose, children }) {
+  if (!isOpen) return null;
   
-  // All derived values
-  const itemCount = items.length;
-  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const discount = couponCode === 'SAVE10' ? subtotal * 0.1 : 0;
-  const tax = (subtotal - discount) * 0.08;
-  const total = subtotal - discount + tax;
-  const isEmpty = items.length === 0;
-  const hasDiscount = discount > 0;
-  
-  const addItem = (product) => {
-    setItems(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      if (existing) {
-        return prev.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { ...product, quantity: 1 }];
-    });
-  };
-  
+  return createPortal(
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}>×</button>
+        {children}
+      </div>
+    </div>,
+    document.getElementById('modal-root') // Renders at document root
+  );
+}
+
+// In your component tree
+function App() {
   return (
-    <div>
-      <h2>Shopping Cart ({itemCount} items)</h2>
-      {isEmpty ? (
-        <p>Your cart is empty</p>
-      ) : (
-        <>
-          {items.map(item => (
-            <CartItem key={item.id} item={item} />
-          ))}
-          <div className="totals">
-            <p>Subtotal: ${subtotal.toFixed(2)}</p>
-            {hasDiscount && <p>Discount: -${discount.toFixed(2)}</p>}
-            <p>Tax: ${tax.toFixed(2)}</p>
-            <p><strong>Total: ${total.toFixed(2)}</strong></p>
-          </div>
-        </>
-      )}
+    <div className="app">
+      <Header />
+      <main style={{ position: 'relative', zIndex: 1 }}>
+        <ContentArea />
+        <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+          <h2>Modal Content</h2>
+        </Modal>
+      </main>
     </div>
   );
 }
@@ -839,259 +1775,16 @@ function ShoppingCart() {
 
 **❌ Bad:**
 ```jsx
-function ShoppingCart() {
-  // Too much state - storing derived values
-  const [items, setItems] = useState([]);
-  const [itemCount, setItemCount] = useState(0);
-  const [subtotal, setSubtotal] = useState(0);
-  const [discount, setDiscount] = useState(0);
-  const [tax, setTax] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [isEmpty, setIsEmpty] = useState(true);
-  const [hasDiscount, setHasDiscount] = useState(false);
-  const [couponCode, setCouponCode] = useState('');
+function Modal({ isOpen, onClose, children }) {
+  if (!isOpen) return null;
   
-  // Multiple useEffects to keep derived state in sync
-  useEffect(() => {
-    setItemCount(items.length);
-    setIsEmpty(items.length === 0);
-  }, [items]);
-  
-  useEffect(() => {
-    const newSubtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    setSubtotal(newSubtotal);
-  }, [items]);
-  
-  useEffect(() => {
-    const newDiscount = couponCode === 'SAVE10' ? subtotal * 0.1 : 0;
-    setDiscount(newDiscount);
-    setHasDiscount(newDiscount > 0);
-  }, [couponCode, subtotal]);
-  
-  useEffect(() => {
-    const newTax = (subtotal - discount) * 0.08;
-    setTax(newTax);
-  }, [subtotal, discount]);
-  
-  useEffect(() => {
-    setTotal(subtotal - discount + tax);
-  }, [subtotal, discount, tax]);
-  
-  // Risk of state getting out of sync
-}
-```
-
-**📌 Key Takeaways:**
-- Only store data that cannot be calculated from other data
-- Use derived values instead of useEffect for calculations
-- Fewer state variables mean fewer bugs and easier debugging
-- State should represent the minimum set of data needed
-
----
-
-### 6. Don't Repeat Yourself (DRY) - But Do It Right
-
-**🔍 What it means:**  
-Eliminate duplication, but only when it actually reduces complexity and improves maintainability.
-
-**✅ Good:**
-```jsx
-// Shared logic used in 3+ components
-const useApi = (endpoint) => {
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(false);
-  // Complex API logic here
-  return { data, loading, refetch };
-};
-```
-
-**❌ Bad:**
-```jsx
-// Extracting one-off logic just because it "looks similar"
-const formatUserName = (first, last) => `${first} ${last}`;
-```
-
-**📌 Key Takeaways:**
-- Extract when you have genuine duplication (3+ uses)
-- Don't extract just because code "looks similar"
-- Sometimes duplication is better than the wrong abstraction
-
----
-
-### 7. Separation of Concerns
-
-**🔍 What it means:**  
-Keep different responsibilities in different places - UI logic, business logic, and data access should be separate.
-
-**✅ Good:**
-```jsx
-// Component handles UI only
-function UserProfile({ userId }) {
-  const user = useUser(userId); // Custom hook handles data
-  return <div>{user?.name}</div>;
-}
-
-// Hook handles data fetching
-function useUser(id) {
-  const [user, setUser] = useState(null);
-  useEffect(() => {
-    fetchUser(id).then(setUser);
-  }, [id]);
-  return user;
-}
-```
-
-**❌ Bad:**
-```jsx
-function UserProfile({ userId }) {
-  const [user, setUser] = useState(null);
-  useEffect(() => {
-    // Mixing API calls with UI component
-    fetch(`/api/users/${userId}`)
-      .then(res => res.json())
-      .then(setUser);
-  }, [userId]);
-  return <div>{user?.name}</div>;
-}
-```
-
-**📌 Key Takeaways:**
-- Components focus on rendering
-- Custom hooks handle business logic and data fetching
-- Utility functions handle pure calculations
-
----
-
-### 8. Fail Fast Principle
-
-**🔍 What it means:**  
-Detect and report errors as early as possible, preferably at development time.
-
-**✅ Good:**
-```jsx
-function Button({ variant, children }) {
-  if (!['primary', 'secondary', 'danger'].includes(variant)) {
-    throw new Error(`Invalid variant: ${variant}. Must be primary, secondary, or danger.`);
-  }
-  return <button className={`btn btn-${variant}`}>{children}</button>;
-}
-```
-
-**❌ Bad:**
-```jsx
-function Button({ variant, children }) {
-  // Silently falls back, bug might go unnoticed
-  const className = variant === 'primary' ? 'btn-primary' : 'btn-secondary';
-  return <button className={className}>{children}</button>;
-}
-```
-
-**📌 Key Takeaways:**
-- Use TypeScript for compile-time error catching
-- Validate props and throw meaningful errors
-- Use development-only warnings for common mistakes
-
----
-
-### 9. Principle of Least Surprise
-
-**🔍 What it means:**  
-Components should behave the way users expect them to, following common patterns and conventions.
-
-**✅ Good:**
-```jsx
-<Button onClick={handleClick} disabled={isLoading}>
-  {isLoading ? 'Loading...' : 'Submit'}
-</Button>
-```
-
-**❌ Bad:**
-```jsx
-<Button pressHandler={handleClick} isNotActive={isLoading}>
-  Submit
-</Button>
-```
-
-**📌 Key Takeaways:**
-- Use standard prop names (`onClick`, not `pressHandler`)
-- Follow established React patterns and conventions
-- Make behavior predictable and consistent
-
----
-
-### 10. You Aren't Gonna Need It (YAGNI)
-
-**🔍 What it means:**  
-Don't build functionality until you actually need it. Avoid over-engineering for hypothetical future requirements.
-
-**✅ Good:**
-```jsx
-// Simple solution for current needs
-function UserCard({ user }) {
+  // Renders within normal component hierarchy
+  // Can be clipped by parent containers or have z-index issues
   return (
-    <div className="user-card">
-      <h3>{user.name}</h3>
-      <p>{user.email}</p>
-    </div>
-  );
-}
-```
-
-**❌ Bad:**
-```jsx
-// Over-engineered for imaginary future needs
-function UserCard({ 
-  user, 
-  showAvatar = false,
-  avatarSize = 'medium',
-  titleLevel = 3,
-  customRenderer,
-  theme = 'default',
-  layout = 'vertical'
-}) {
-  // Complex logic for unused features
-}
-```
-
-**📌 Key Takeaways:**
-- Solve today's problems, not tomorrow's maybes
-- Add complexity when you have real requirements
-- Refactor when you actually need the flexibility
-
----
-
-### 11. Open/Closed Principle (for Components)
-
-**🔍 What it means:**  
-Components should be open for extension but closed for modification. Use composition and props to extend behavior.
-
-**✅ Good:**
-```jsx
-function Dialog({ children, actions }) {
-  return (
-    <div className="dialog">
-      <div className="dialog-content">{children}</div>
-      <div className="dialog-actions">{actions}</div>
-    </div>
-  );
-}
-
-// Extended through composition
-<Dialog actions={<Button>OK</Button>}>
-  <p>Are you sure you want to delete this item?</p>
-</Dialog>
-```
-
-**❌ Bad:**
-```jsx
-function Dialog({ message, showOk, showCancel, onOk, onCancel }) {
-  // Modifying component for every new use case
-  return (
-    <div className="dialog">
-      <p>{message}</p>
-      <div>
-        {showOk && <button onClick={onOk}>OK</button>}
-        {showCancel && <button onClick={onCancel}>Cancel</button>}
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={e => e.stopPropagation()}>
+        <button className="modal-close" onClick={onClose}>×</button>
+        {children}
       </div>
     </div>
   );
@@ -1099,35 +1792,166 @@ function Dialog({ message, showOk, showCancel, onOk, onCancel }) {
 ```
 
 **📌 Key Takeaways:**
-- Design for extension through props and composition
-- Avoid modifying existing components for new requirements
-- Use render props or children for maximum flexibility
+- Use portals for overlays that need to escape parent containers
+- Portals help avoid z-index and overflow issues
+- Modal content still receives props and context from its logical parent
+- Remember to create the portal root element in your HTML
 
 ---
 
+## 🧠 Mental Models
+
+Important mental frameworks for thinking about React development.
+
+### Smart/Dumb Component Split Isn't Sacred
+
+**🔍 What it means:**  
+Don't force artificial separations between "smart" (container) and "dumb" (presentational) components. Modern React with hooks makes this pattern less necessary.
+
+**✅ Good:**
+```jsx
+// Modern approach: components handle their own data needs
+function UserProfile({ userId }) {
+  const { user, updateUser } = useUser(userId);
+  const [isEditing, setIsEditing] = useState(false);
+  
+  if (isEditing) {
+    return <UserForm user={user} onSave={updateUser} onCancel={() => setIsEditing(false)} />;
+  }
+  
+  return (
+    <div className="user-profile">
+      <img src={user.avatar} alt={user.name} />
+      <h2>{user.name}</h2>
+      <p>{user.email}</p>
+      <button onClick={() => setIsEditing(true)}>Edit</button>
+    </div>
+  );
+}
+```
+
+**❌ Bad:**
+```jsx
+// Overly rigid separation
+function UserProfileContainer({ userId }) {
+  const { user, updateUser } = useUser(userId);
+  const [isEditing, setIsEditing] = useState(false);
+  
+  return (
+    <UserProfilePresentation 
+      user={user}
+      isEditing={isEditing}
+      onEdit={() => setIsEditing(true)}
+      onSave={updateUser}
+      onCancel={() => setIsEditing(false)}
+    />
+  );
+}
+
+// Unnecessary separation that just passes props through
+function UserProfilePresentation({ user, isEditing, onEdit, onSave, onCancel }) {
+  if (isEditing) {
+    return <UserForm user={user} onSave={onSave} onCancel={onCancel} />;
+  }
+  
+  return (
+    <div className="user-profile">
+      <img src={user.avatar} alt={user.name} />
+      <h2>{user.name}</h2>
+      <p>{user.email}</p>
+      <button onClick={onEdit}>Edit</button>
+    </div>
+  );
+}
+```
+
+**📌 Key Takeaways:**
+- Separate when it provides real value, not for dogma
+- Custom hooks extract logic better than container components
+- Co-location often beats artificial separation
+- Let components be responsible for their own concerns
+
+---
+
+### Prefer Composition Over Inheritance (React-style)
+
+**🔍 What it means:**  
+Use React's composition patterns (children, render props, compound components) instead of class inheritance or complex prop drilling.
+
+**✅ Good:**
+```jsx
+// Composition with compound components
+function Card({ children }) {
+  return <div className="card">{children}</div>;
+}
+
+function CardHeader({ children }) {
+  return <div className="card-header">{children}</div>;
+}
+
+function CardBody({ children }) {
+  return <div className="card-body">{children}</div>;
+}
+
+function CardActions({ children }) {
+  return <div className="card-actions">{children}</div>;
+}
+
+// Flexible usage
+<Card>
+  <CardHeader>
+    <h2>User Profile</h2>
+  </CardHeader>
+  <CardBody>
+    <UserInfo user={user} />
+  </CardBody>
+  <CardActions>
+    <Button variant="primary">Edit</Button>
+    <Button variant="secondary">Delete</Button>
+  </CardActions>
+</Card>
+```
+
+**❌ Bad:**
+```jsx
+// Inheritance-like pattern
+class BaseCard extends Component {
+  render() {
+    return (
+      <div className="card">
+        {this.renderHeader()}
+        {this.renderBody()}
+        {this.renderActions()}
+      </div>
+    );
+  }
+  
+  renderHeader() { throw new Error('Must implement renderHeader'); }
+  renderBody() { throw new Error('Must implement renderBody'); }
+  renderActions() { throw new Error('Must implement renderActions'); }
+}
+
+class UserCard extends BaseCard {
+  renderHeader() { return <h2>User Profile</h2>; }
+  renderBody() { return <UserInfo user={this.props.user} />; }
+  renderActions() { return <Button>Edit</Button>; }
+}
+```
+
+**📌 Key Takeaways:**
+- React composition is more flexible than inheritance
+- Use children, slots, and compound components
+- Composition makes components more reusable and testable
+- Avoid deep inheritance hierarchies
+
+---
+
+## 📖 Design Principles Overview
+
+These design principles are intended to guide React developers in creating maintainable, readable, and efficient applications. They encompass both core React patterns and general software design principles, providing a framework for making informed decisions throughout the development process.
+
 ## 🧠 Quick Reference
 
-### Core React Patterns
-| Principle | Core Idea |
-|-----------|-----------|
-| **Locality > Reuse** | Keep logic close until reuse demands it |
-| **Derive State** | Store the source, not the symptoms |
-| **Avoid Boolean Hell** | Use one status, not many flags |
-| **UI = f(state)** | No randomness or side effects in render |
-| **Co-locate Until It Hurts** | Don't extract early |
-| **Explicitness > Generality** | Name things clearly, even if repeated |
-| **Composition > Configuration** | Use JSX composition over prop config |
-| **Copy > Abstraction** | Prefer clarity and locality over DRY |
-
-### Standard React Principles
-| Principle | Core Idea |
-|-----------|-----------|
-| **Single Source of Truth** | Keep shared state in one place |
-| **Lifting State Up** | Move shared state to the closest parent |
-| **Controlled > Uncontrolled** | Let React manage form state explicitly |
-| **Declarative UI** | Describe UI based on state, not manual steps |
-| **Use Keys in Lists** | Helps React know what changed |
-| **Effects = Side Effects** | Don't use useEffect for render logic |
 
 ### Decision Framework
 
